@@ -1,0 +1,18 @@
+{
+    "name": "economic/soap-php-client",
+    "description": "PHP client for E-conomic SOAP API",
+    "require-dev": {
+        "phpunit/phpunit": "3.7"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Anonnymous"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Economic\\": "src/"
+        }
+    }
+}
