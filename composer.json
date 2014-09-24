@@ -5,11 +5,6 @@
         "phpunit/phpunit": "3.7"
     },
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Anonnymous"
-        }
-    ],
     "autoload": {
         "psr-0": {
             "Economic\\": "src/"
