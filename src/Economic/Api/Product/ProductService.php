@@ -59,9 +59,10 @@ class ProductService extends Service
             if (isset($response->Product_GetDataResult)) {
                 $product->setCostPrice($response->Product_GetDataResult->CostPrice);
                 $product->setRecommendedPrice($response->Product_GetDataResult->RecommendedPrice);
-                $product->setUnitHandle($response->Product_GetDataResult->UnitHandle);
                 $product->setName($response->Product_GetDataResult->Name);
-                $product->setDescription($response->Product_GetDataResult->Description);
+                if (isset($response->Product_GetDataResult->Description)) {
+                    $product->setDescription($response->Product_GetDataResult->Description);
+                }
 
                 return $product;
             }

@@ -10,7 +10,7 @@ class Product extends Object
 {
     protected $available = 0;
     protected $barCode;
-    protected $costPrice;
+    protected $costPrice = 0;
     protected $departmentHandle;
     protected $description;
     protected $distributionKeyHandle;
@@ -22,12 +22,12 @@ class Product extends Object
     protected $onOrder = 0;
     protected $ordered = 0;
     protected $productGroupHandle = array("Number" => 1);
-    protected $recommendedPrice;
+    protected $recommendedPrice = 0;
     protected $salesPrice;
     protected $unitHandle = array("Number" => 1);
     protected $volume = 1;
 
-    protected $required = array("salesPrice", "costPrice", "recommendedPrice", "volume", "name", "description", "number");
+    protected $required = array("salesPrice", "volume", "name", "description", "number");
 
     /**
      * @param mixed $available

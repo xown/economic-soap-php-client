@@ -12,6 +12,7 @@ class CurrentInvoice extends Invoice
     protected $marginAsPercent = 0;
     protected $required = array("date", "exchangeRate", "isVatIncluded", "netAmount", "vatAmount", "grossAmount", "margin", "marginAsPercent", "termOfPaymentHandle");
     protected $vatAmount = 0;
+    protected $deductionAmount = 0;
 
     /**
      * @return int
@@ -100,5 +101,21 @@ class CurrentInvoice extends Invoice
         foreach ($this->getLines() as $line) {
             $line->setInvoiceHandle($handle);
         }
+    }
+
+    /**
+     * @param int $deductionAmount
+     */
+    public function setDeductionAmount($deductionAmount)
+    {
+        $this->deductionAmount = $deductionAmount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDeductionAmount()
+    {
+        return $this->deductionAmount;
     }
 }

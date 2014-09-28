@@ -4,6 +4,7 @@
 namespace Economic;
 
 
+use Economic\Api\CashBook\CashBookService;
 use Economic\Api\Configuration;
 use Economic\Api\Debtor\DebtorService;
 use Economic\Api\Exception\AuthenticationException;
@@ -64,6 +65,18 @@ class Client
     }
 
     /**
+     * @return CashBookService
+     */
+    public function getCashBookService()
+    {
+        if (!isset($this->instances["cash_book"])) {
+            $this->instances["cash_book"] = new CashBookService($this);
+        }
+
+        return $this->instances["cash_book"];
+    }
+
+    /**
      * @return DebtorService
      */
     public function getDebtorService()
@@ -87,6 +100,9 @@ class Client
         return $this->instances["product"];
     }
 
+    /**
+     * @return CurrentInvoiceService
+     */
     public function getCurrentInvoiceService()
     {
         if (!isset($this->instances["current_invoice"])) {

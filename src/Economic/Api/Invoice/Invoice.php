@@ -29,6 +29,7 @@ class Invoice extends Object
     protected $textLine1;
     protected $textLine2;
     protected $vatAmount;
+    protected $vatZone;
     private $debtor;
     private $delivery;
     private $lines = array();
@@ -375,6 +376,22 @@ class Invoice extends Object
     public function setTextLine2($textLine2)
     {
         $this->textLine2 = $textLine2;
+    }
+
+    /**
+     * @param mixed $vatZone
+     */
+    public function setVatZone($vatZone)
+    {
+        $this->vatZone = $vatZone;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVatZone()
+    {
+        return $this->vatZone;
     }
 
     /**
