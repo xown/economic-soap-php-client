@@ -9,6 +9,7 @@ use Economic\Api\Configuration;
 use Economic\Api\Debtor\DebtorService;
 use Economic\Api\Exception\AuthenticationException;
 use Economic\Api\Invoice\CurrentInvoiceService;
+use Economic\Api\Invoice\InvoiceService;
 use Economic\Api\Product\ProductService;
 
 class Client
@@ -110,6 +111,18 @@ class Client
         }
 
         return $this->instances["current_invoice"];
+    }
+
+    /**
+     * @return InvoiceService
+     */
+    public function getInvoiceService()
+    {
+        if (!isset($this->instances["invoice"])) {
+            $this->instances["invoice"] = new InvoiceService($this);
+        }
+
+        return $this->instances["invoice"];
     }
 
     public function reset(Configuration $configuration = null)

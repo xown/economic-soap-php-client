@@ -9,6 +9,24 @@ use Economic\Api;
 
 class CurrentInvoiceService extends Service
 {
+    public function findByOtherReference($number)
+    {
+        $this->client->connect();
+        try{
+            $response = $this->client->CurrentInvoice_FindByOtherReference(array("otherReference" => $number));
+            if(!isset($response->CurrentInvoice_FindByOtherReferenceResult)) {
+                throw new Api\Exception\InvoiceNotFoundException(sprintf("The CurrentInvoice with %s couldn't be found", $number));
+            }
+
+            $currentInvoice = new CurrentInvoice();
+            $currentInvoice->setHandle((array)$response->CurrentInvoice_FindByOtherReferenceResult);
+
+            return $currentInvoice;
+        } catch (\SoapFault $e) {
+            throw new Api\Exception\EconomicException($e->getMessage());
+        }
+    }
+
     public function book(CurrentInvoice $invoice)
     {
         $this->client->connect();
