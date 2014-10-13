@@ -14,7 +14,7 @@ class InvoiceService extends Service
         $this->client->connect();
         try{
             $response = $this->client->Invoice_FindByOtherReference(array("otherReference" => $number));
-            if(!isset($response->CurrentInvoice_FindByOtherReferenceResult)) {
+            if(!isset($response->CurrentInvoice_FindByOtherReferenceResult) || !isset($response->CurrentInvoice_FindByOtherReferenceResult->Number)) {
                 throw new Api\Exception\InvoiceNotFoundException(sprintf("The Invoice with %s couldn't be found", $number));
             }
 
