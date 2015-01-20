@@ -60,21 +60,33 @@ class CurrentInvoiceService extends Service
 
     public function createLines(CurrentInvoice $invoice)
     {
-        foreach ($invoice->getLines() as $line) {
-            $this->sendLine($line);
+        $lines = array();
+        $invoiceLines = $invoice->getLines();
+        foreach ( $invoiceLines as $line) {
+            $l = $line->toArray();
+            if(!isset($l['ProductHandle']['Id'])) {
+                $l['ProductHandle']['Id'] = null;
+            }
+            $lines[] = $l;
+            break;
         }
+
+        $handles = $this->sendLines($lines);
+        foreach($handles as $key=>$handle) {
+            $invoiceLines[$key]->setHandle((array)$handle);
+        }
+
         return $invoice;
     }
 
-    private function sendLine(CurrentInvoiceLine $line)
+    private function sendLines($lines)
     {
         $this->client->connect();
         try {
-            $response = $this->client->CurrentInvoiceLine_CreateFromData(array("data" => $line->toArray()));
-            if (isset($response->CurrentInvoiceLine_CreateFromDataResult)) {
-                $line->setHandle((array) $response->CurrentInvoiceLine_CreateFromDataResult);
-
-                return $line;
+            $response = $this->client->CurrentInvoiceLine_CreateFromDataArray(array("dataArray" => array('CurrentInvoiceLineData' => $lines)));
+            if (isset($response->CurrentInvoiceLine_CreateFromDataArrayResult)) {
+                $data = $response->CurrentInvoiceLine_CreateFromDataArrayResult->CurrentInvoiceLineHandle;
+                return isset($data->Id) ? array($data) : $data;
             }
             var_dump($response);
         } catch (\SoapFault $e) {
