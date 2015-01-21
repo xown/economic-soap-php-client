@@ -68,7 +68,6 @@ class CurrentInvoiceService extends Service
                 $l['ProductHandle']['Id'] = null;
             }
             $lines[] = $l;
-            break;
         }
 
         $handles = $this->sendLines($lines);
