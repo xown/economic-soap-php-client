@@ -26,4 +26,28 @@ class DebtorPayment extends Object
     {
         $this->contraAccount = $this->getHandle($contraAccountHandle);
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCashBookHandle()
+    {
+        return $this->cashBookHandle;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDebtorHandle()
+    {
+        return $this->debtorHandle;
+    }
+
+    /**
+     * @return array
+     */
+    public function getContraAccount()
+    {
+        return $this->contraAccount;
+    }
 }

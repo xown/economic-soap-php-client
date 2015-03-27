@@ -4,6 +4,7 @@ namespace Economic\Api\CashBook;
 use Economic\Api\Exception\EconomicException;
 use Economic\Api\Invoice\Invoice;
 use Economic\Api\Service;
+use Economic\Api;
 
 class CashBookService extends Service
 {
@@ -11,9 +12,16 @@ class CashBookService extends Service
     {
         $this->client->connect();
         try {
-            $response = $this->client->CashBookEntry_CreateDebtorPayment($debtor->toArray());
+            $response = $this->client->CashBookEntry_CreateDebtorPayment(array(
+                'cashBookHandle' => $debtor->getCashBookHandle(),
+                'debtorHandle' => $debtor->getDebtorHandle(),
+                'contraAccountHandle' => $debtor->getContraAccount(),
+            ));
 
-            return new CashBookEntry((array) $response->CashBookEntry_CreateDebtorPaymentResult);
+            $entry = new CashBookEntry();
+            $entry->setHandle($response->CashBookEntry_CreateDebtorPaymentResult);
+
+            return $entry;
         } catch (\SoapFault $e) {
             throw new EconomicException($e->getMessage());
         }
@@ -22,16 +30,15 @@ class CashBookService extends Service
     public function updateEntryFromInvoice(CashBookEntry $entry, Invoice $invoice)
     {
         $this->client->connect();
-        $cashBookData = array("CashBookEntryHandle" => $entry->toArray());
 
         try {
-            $this->client->CashBookEntry_SetValue(array_merge($cashBookData, array("value" => $invoice->getGrossAmount())));
-            $number = $invoice->getId();
+            $this->client->CashBookEntry_SetAmount(array('cashBookEntryHandle' => $entry->getHandle(), 'value' => $invoice->getGrossAmount()));
+            $number = $invoice->getHandle();
             if (is_array($number)) {
                 $number = current($number);
             }
-            $this->client->CashBookEntry_SetDebtorInvoiceNumber(array_merge($cashBookData, array("value" => $number)));
-            $this->client->CashBookEntry_SetText(array_merge($cashBookData, array("value" => "Invoice No. {$number}")));
+            $this->client->CashBookEntry_SetDebtorInvoiceNumber(array('cashBookEntryHandle' => $entry->getHandle(), 'value' => $number));
+            $this->client->CashBookEntry_SetText(array('cashBookEntryHandle' => $entry->getHandle(), 'value' => "Invoice: {$number}, Other Reference: {$invoice->getOtherReference()}"));
 
             return $entry;
         } catch (\SoapFault $e) {
@@ -43,9 +50,41 @@ class CashBookService extends Service
     {
         $this->client->connect();
         try {
-            $response = $this->client->CashBook_FindByName($name);
+            $response = $this->client->CashBook_FindByName(array('name' => $name));
 
-            return new CashBook((array) $response->CashBook_FindByNameResult);
+            $cashbook = new CashBook();
+            $cashbook->setHandle((array) $response->CashBook_FindByNameResult);
+
+            return $cashbook;
+        } catch (\SoapFault $e) {
+            throw new EconomicException($e->getMessage());
+        }
+    }
+
+    public function getAll()
+    {
+        $this->client->connect();
+        try {
+            $response = $this->client->CashBook_GetAll();
+
+            $response = $this->client->CashBook_GetDataArray(array('entityHandles' => $response->CashBook_GetAllResult->CashBookHandle));
+
+            if(!isset($response->CurrentInvoiceLine_GetDataArrayResult)) {
+                throw new Api\Exception\EconomicException(sprintf("Failed fetching cashbook data"));
+            }
+
+            $cashbooks = array();
+
+            foreach($response->CashBook_GetDataArrayResult->CashBookData as $cashbookData) {
+                $cashbook = new CashBook();
+                $cashbook->setName($cashbookData->Name);
+                $cashbook->setNumber($cashbookData->Number);
+                $cashbook->setHandle((array) $cashbookData->Handle);
+
+                $lines[$cashbookData->Number] = $cashbook;
+            }
+
+            return $cashbooks;
         } catch (\SoapFault $e) {
             throw new EconomicException($e->getMessage());
         }

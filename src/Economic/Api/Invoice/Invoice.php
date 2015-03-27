@@ -123,7 +123,7 @@ class Invoice extends Object
     }
 
     /**
-     * @return array
+     * @return array|CurrentInvoiceLine[]
      */
     public function getLines()
     {

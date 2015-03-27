@@ -27,6 +27,77 @@ class CurrentInvoiceService extends Service
         }
     }
 
+    public function getAll()
+    {
+        $this->client->connect();
+        try{
+            $response = $this->client->CurrentInvoice_GetAll();
+            if(!isset($response->CurrentInvoice_GetAllResult)) {
+                throw new Api\Exception\InvoiceNotFoundException(sprintf("Failed fetching current invoice list"));
+            }
+            $invoices = array();
+            foreach($response->CurrentInvoice_GetAllResult->CurrentInvoiceHandle as $handle) {
+                $currentInvoice = new CurrentInvoice();
+                $currentInvoice->setHandle((array)$handle);
+                $invoices[$handle->Id] = $currentInvoice;
+            }
+
+            return $invoices;
+        } catch (\SoapFault $e) {
+            throw new Api\Exception\EconomicException($e->getMessage());
+        }
+    }
+
+    public function getLines(CurrentInvoice $invoice)
+    {
+        $this->client->connect();
+        try{
+            $response = $this->client->CurrentInvoice_GetLines(array('currentInvoiceHandle' => $invoice->getHandle()));
+            if(!isset($response->CurrentInvoice_GetLinesResult)) {
+                throw new Api\Exception\InvoiceNotFoundException(sprintf("Failed fetching current invoice lines"));
+            }
+            $lines = array();
+
+            if (count($response->CurrentInvoice_GetLinesResult->CurrentInvoiceLineHandle) > 0) {
+                $response = $this->client->CurrentInvoiceLine_GetDataArray(array('entityHandles' => $response->CurrentInvoice_GetLinesResult->CurrentInvoiceLineHandle));
+                if(!isset($response->CurrentInvoiceLine_GetDataArrayResult)) {
+                    throw new Api\Exception\InvoiceNotFoundException(sprintf("Failed fetching current invoice lines"));
+                }
+
+                foreach($response->CurrentInvoiceLine_GetDataArrayResult->CurrentInvoiceLineData as $lineData) {
+                    $currentInvoiceLine = new CurrentInvoiceLine();
+                    $currentInvoiceLine->setHandle((array)$lineData->Handle);
+                    $currentInvoiceLine->setQuantity($lineData->Quantity);
+                    $currentInvoiceLine->setUnitNetPrice($lineData->UnitNetPrice);
+                    $currentInvoiceLine->setDescription($lineData->Description);
+
+                    $lines[$lineData->Number] = $currentInvoiceLine;
+                }
+            }
+
+            return $lines;
+        } catch (\SoapFault $e) {
+            throw new Api\Exception\EconomicException($e->getMessage());
+        }
+    }
+
+    public function delete($invoiceHandle)
+    {
+        $this->client->connect();
+
+        if ($invoiceHandle instanceof CurrentInvoice) {
+            $invoiceHandle = $invoiceHandle->getHandle();
+        }
+
+        try {
+            $response = $this->client->CurrentInvoice_Delete(array("currentInvoiceHandle" => $invoiceHandle));
+
+            return isset($response->CurrentInvoice_DeleteResult);
+        } catch (\SoapFault $e) {
+            throw $e;
+        }
+    }
+
     public function book(CurrentInvoice $invoice)
     {
         $this->client->connect();
@@ -42,6 +113,7 @@ class CurrentInvoiceService extends Service
             throw $e;
         }
     }
+
     public function createFromData(CurrentInvoice $invoice)
     {
         $this->client->connect();
