@@ -36,10 +36,12 @@ class CurrentInvoiceService extends Service
                 throw new Api\Exception\InvoiceNotFoundException(sprintf("Failed fetching current invoice list"));
             }
             $invoices = array();
-            foreach($response->CurrentInvoice_GetAllResult->CurrentInvoiceHandle as $handle) {
-                $currentInvoice = new CurrentInvoice();
-                $currentInvoice->setHandle((array)$handle);
-                $invoices[$handle->Id] = $currentInvoice;
+            if (isset($response->CurrentInvoice_GetAllResult->CurrentInvoiceHandle)) {
+                foreach ($response->CurrentInvoice_GetAllResult->CurrentInvoiceHandle as $handle) {
+                    $currentInvoice = new CurrentInvoice();
+                    $currentInvoice->setHandle((array)$handle);
+                    $invoices[$handle->Id] = $currentInvoice;
+                }
             }
 
             return $invoices;
