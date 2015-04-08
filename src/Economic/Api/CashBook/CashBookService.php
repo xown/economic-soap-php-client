@@ -27,12 +27,12 @@ class CashBookService extends Service
         }
     }
 
-    public function updateEntryFromInvoice(CashBookEntry $entry, Invoice $invoice)
+    public function updateEntryFromInvoice(CashBookEntry $entry, Invoice $invoice, $amount)
     {
         $this->client->connect();
 
         try {
-            $this->client->CashBookEntry_SetAmount(array('cashBookEntryHandle' => $entry->getHandle(), 'value' => $invoice->getGrossAmount()));
+            $this->client->CashBookEntry_SetAmount(array('cashBookEntryHandle' => $entry->getHandle(), 'value' => $amount));
             $number = $invoice->getHandle();
             if (is_array($number)) {
                 $number = current($number);
