@@ -36,13 +36,17 @@ class CurrentInvoiceService extends Service
                 throw new Api\Exception\InvoiceNotFoundException(sprintf("Failed fetching current invoice list"));
             }
             $invoices = array();
-            if (isset($response->CurrentInvoice_GetAllResult->CurrentInvoiceHandle)) {
-                foreach ($response->CurrentInvoice_GetAllResult->CurrentInvoiceHandle as $handle) {
-                    $currentInvoice = new CurrentInvoice();
-                    $currentInvoice->setHandle((array)$handle);
-                    $invoices[$handle->Id] = $currentInvoice;
-                }
+            $currentInvoiceHandle = isset($response->CurrentInvoice_GetAllResult->CurrentInvoiceHandle) ? $response->CurrentInvoice_GetAllResult->CurrentInvoiceHandle : array();
+            if(isset($currentInvoiceHandle->Id)) {
+                $currentInvoiceHandle = array($currentInvoiceHandle);
             }
+
+            foreach ($currentInvoiceHandle as $handle) {
+                $currentInvoice = new CurrentInvoice();
+                $currentInvoice->setHandle((array)$handle);
+                $invoices[$handle->Id] = $currentInvoice;
+            }
+
 
             return $invoices;
         } catch (\SoapFault $e) {
@@ -60,13 +64,24 @@ class CurrentInvoiceService extends Service
             }
             $lines = array();
 
-            if (count($response->CurrentInvoice_GetLinesResult->CurrentInvoiceLineHandle) > 0) {
-                $response = $this->client->CurrentInvoiceLine_GetDataArray(array('entityHandles' => $response->CurrentInvoice_GetLinesResult->CurrentInvoiceLineHandle));
+            $currentInvoiceLineHandle = isset($response->CurrentInvoice_GetLinesResult->CurrentInvoiceLineHandle) ? $response->CurrentInvoice_GetLinesResult->CurrentInvoiceLineHandle : array();
+            if (isset($currentInvoiceLineHandle->Id)) {
+                //Single result. make it array
+                $currentInvoiceLineHandle = array($currentInvoiceLineHandle);
+            }
+
+            if (count($currentInvoiceLineHandle) > 0) {
+                $response = $this->client->CurrentInvoiceLine_GetDataArray(array('entityHandles' => $currentInvoiceLineHandle));
                 if(!isset($response->CurrentInvoiceLine_GetDataArrayResult)) {
                     throw new Api\Exception\InvoiceNotFoundException(sprintf("Failed fetching current invoice lines"));
                 }
 
-                foreach($response->CurrentInvoiceLine_GetDataArrayResult->CurrentInvoiceLineData as $lineData) {
+                $invoiceLineData = isset($response->CurrentInvoiceLine_GetDataArrayResult->CurrentInvoiceLineData) ? $response->CurrentInvoiceLine_GetDataArrayResult->CurrentInvoiceLineData : array();
+                if (isset($invoiceLineData->Id)) {
+                    $invoiceLineData = array($invoiceLineData);
+                }
+
+                foreach($invoiceLineData as $lineData) {
                     $currentInvoiceLine = new CurrentInvoiceLine();
                     $currentInvoiceLine->setHandle((array)$lineData->Handle);
                     $currentInvoiceLine->setQuantity($lineData->Quantity);
