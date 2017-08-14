@@ -50,4 +50,13 @@ class DebtorPayment extends Object
     {
         return $this->contraAccount;
     }
+
+    protected function getHandle($handle, $key = "Number")
+    {
+        if (is_array($handle) && array_key_exists($key, $handle)) {
+            return $handle;
+        } else {
+            return array($key => $handle);
+        }
+    }
 }
